@@ -27,7 +27,9 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
        if (TASK_TOOLS.includes(toolName)) {
          const prompt = output.args.prompt as string | undefined
          if (prompt && !prompt.includes(SYSTEM_DIRECTIVE_PREFIX)) {
-           output.args.prompt = PLANNING_CONSULT_WARNING + prompt
+           if (!Object.isFrozen(output.args)) {
+             output.args.prompt = PLANNING_CONSULT_WARNING + prompt
+           }
           log(`[${HOOK_NAME}] Injected planning warning to ${toolName}`, {
             sessionID: input.sessionID,
             tool: toolName,

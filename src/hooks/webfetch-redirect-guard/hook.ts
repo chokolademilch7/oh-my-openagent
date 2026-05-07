@@ -85,7 +85,9 @@ export function createWebFetchRedirectGuardHook(_ctx: PluginInput) {
         })
 
         if (resolution.type === "resolved") {
-          output.args.url = resolution.url
+          if (!Object.isFrozen(output.args)) {
+            output.args.url = resolution.url
+          }
           return
         }
 

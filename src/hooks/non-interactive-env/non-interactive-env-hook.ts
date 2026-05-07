@@ -62,7 +62,9 @@ export function createNonInteractiveEnvHook(_ctx: PluginInput) {
         return
       }
 
-      output.args.command = `${envPrefix} ${command}`
+      if (!Object.isFrozen(output.args)) {
+        output.args.command = `${envPrefix} ${command}`
+      }
 
       log(`[${HOOK_NAME}] Prepended non-interactive env vars to git command`, {
         sessionID: input.sessionID,

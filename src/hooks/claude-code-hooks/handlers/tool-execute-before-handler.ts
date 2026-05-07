@@ -39,7 +39,9 @@ export function createToolExecuteBeforeHandler(ctx: PluginInput, config: PluginC
 				)
 			}
 
-			output.args.todos = parsed
+			if (!Object.isFrozen(output.args)) {
+				output.args.todos = parsed
+			}
 			log("todowrite: parsed todos string to array", { sessionID: input.sessionID })
 		}
 
@@ -87,7 +89,9 @@ export function createToolExecuteBeforeHandler(ctx: PluginInput, config: PluginC
 		}
 
 		if (result.modifiedInput) {
-			Object.assign(output.args, result.modifiedInput)
+			if (!Object.isFrozen(output.args)) {
+				Object.assign(output.args, result.modifiedInput)
+			}
 		}
 	}
 }

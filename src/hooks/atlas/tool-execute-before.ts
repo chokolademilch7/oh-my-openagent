@@ -92,7 +92,9 @@ export function createToolExecuteBeforeHandler(input: {
 
       const prompt = toolOutput.args.prompt as string | undefined
       if (prompt && !prompt.includes(SYSTEM_DIRECTIVE_PREFIX)) {
-        toolOutput.args.prompt = `<system-reminder>${SINGLE_TASK_DIRECTIVE}</system-reminder>\n` + prompt
+        if (!Object.isFrozen(toolOutput.args)) {
+          toolOutput.args.prompt = `<system-reminder>${SINGLE_TASK_DIRECTIVE}</system-reminder>\n` + prompt
+        }
         log(`[${HOOK_NAME}] Injected single-task directive to task`, {
           sessionID: toolInput.sessionID,
         })

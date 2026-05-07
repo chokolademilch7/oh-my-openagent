@@ -33,7 +33,9 @@ export function createSisyphusJuniorNotepadHook(ctx: PluginInput) {
       }
 
       // 5. Prepend directive
-      output.args.prompt = NOTEPAD_DIRECTIVE + prompt
+      if (!Object.isFrozen(output.args)) {
+        output.args.prompt = NOTEPAD_DIRECTIVE + prompt
+      }
 
       // 6. Log injection
       log(`[${HOOK_NAME}] Injected notepad directive to task`, {

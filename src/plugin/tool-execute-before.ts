@@ -54,7 +54,9 @@ export function createToolExecuteBeforeHandler(args: {
   return async (input, output): Promise<void> => {
     if (input.tool.toLowerCase() === "bash" && typeof output.args.command === "string") {
       if (output.args.command.includes("\x00")) {
-        output.args.command = output.args.command.replace(/\x00/g, "")
+        if (!Object.isFrozen(output.args)) {
+          output.args.command = output.args.command.replace(/\x00/g, "")
+        }
         log("[tool-execute-before] Stripped null bytes from bash command", {
           sessionID: input.sessionID,
           callID: input.callID,
@@ -99,15 +101,18 @@ export function createToolExecuteBeforeHandler(args: {
 
     if (input.tool === "task") {
       const argsObject = output.args
+      const frozen = Object.isFrozen(argsObject)
       const category = typeof argsObject.category === "string" ? argsObject.category : undefined
       const subagentType = typeof argsObject.subagent_type === "string" ? argsObject.subagent_type : undefined
       const taskId = typeof argsObject.task_id === "string" ? argsObject.task_id : undefined
 
-      if (category) {
-        argsObject.subagent_type = "sisyphus-junior"
-      } else if (!subagentType && taskId) {
-        const resolvedAgent = await resolveSessionAgent(ctx.client, taskId)
-        argsObject.subagent_type = resolvedAgent ?? "continue"
+      if (!frozen) {
+        if (category) {
+          argsObject.subagent_type = "sisyphus-junior"
+        } else if (!subagentType && taskId) {
+          const resolvedAgent = await resolveSessionAgent(ctx.client, taskId)
+          argsObject.subagent_type = resolvedAgent ?? "continue"
+        }
       }
 
       const normalizedSubagentType =
@@ -134,12 +139,14 @@ export function createToolExecuteBeforeHandler(args: {
           verification_attempt_id: verificationAttemptId,
           verification_session_id: undefined,
         })
-        argsObject.run_in_background = false
-        argsObject.prompt = buildUltraworkOracleVerificationPrompt(
-          prompt,
-          loopState.prompt,
-          verificationAttemptId,
-        )
+        if (!frozen) {
+          argsObject.run_in_background = false
+          argsObject.prompt = buildUltraworkOracleVerificationPrompt(
+            prompt,
+            loopState.prompt,
+            verificationAttemptId,
+          )
+        }
       }
     }
 

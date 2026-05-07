@@ -54,7 +54,9 @@ export function createQuestionLabelTruncatorHook() {
 
         if (args?.questions) {
           const truncatedArgs = truncateQuestionLabels(args);
-          Object.assign(output.args, truncatedArgs);
+          if (!Object.isFrozen(output.args)) {
+            Object.assign(output.args, truncatedArgs);
+          }
         }
       }
     },
